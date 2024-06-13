@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:nasa_app/src/login/register_screen.dart';
 import 'package:nasa_app/src/screens/menu/menu_navegacion.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error en el inicio de sesión: $e')),
+          SnackBar(content: Text('Login failed: $e')),
         );
       } finally {
         setState(() {
@@ -55,9 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -71,11 +68,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary,
+                      color: Colors.blueAccent,
                       borderRadius: BorderRadius.circular(16.0),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Iniciar sesión',
@@ -100,8 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                      labelText: 'Usuario',
-                      prefixIcon: Icon(Icons.person),
+                      labelText: 'Correo electrónico',
+                      prefixIcon: Icon(Icons.email),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -132,6 +129,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   SizedBox(height: 16.0),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        // Implementa la funcionalidad para restablecer la contraseña
+                      },
+                      child: Text(
+                        '¿Olvidaste tu contraseña?',
+                        style: TextStyle(color: Colors.blueAccent),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.0),
                   _isLoading
                       ? CircularProgressIndicator()
                       : ElevatedButton(
@@ -150,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: Text(
                       '¿No tienes cuenta? Regístrate ahora',
-                      style: TextStyle(color: colorScheme.primary),
+                      style: TextStyle(color: Colors.blueAccent),
                     ),
                   ),
                 ],
