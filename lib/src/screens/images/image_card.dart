@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:nasa_app/src/screens/images/image_service.dart';
 
 class ImageCard extends StatefulWidget {
@@ -24,8 +23,7 @@ class _ImageCardState extends State<ImageCard> {
   }
 
   Future<void> _voteForImage() async {
-    final client = GraphQLProvider.of(context).value;
-    final imageService = ImageService(client: client);
+    final imageService = ImageService();
 
     try {
       int imgId = int.parse(widget.image['id']); // Convertir el id a int
@@ -49,8 +47,7 @@ class _ImageCardState extends State<ImageCard> {
 
   @override
   Widget build(BuildContext context) {
-
-    final colorSchema = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -102,7 +99,7 @@ class _ImageCardState extends State<ImageCard> {
                       ),
                       label: Text('Votar'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: colorSchema.surface,
+                        backgroundColor: colorScheme.surface,
                       ),
                     ),
                     Text(
@@ -122,5 +119,3 @@ class _ImageCardState extends State<ImageCard> {
     );
   }
 }
-
-

@@ -33,3 +33,5 @@ V
 &lib/src/screens/images/image_card.dart,a\2\a22cc75fd87771e86161fe626a435c8084c95cc7
 =
 firebase.json,5\9\59951656e3803454427cfe9d761fed1df10b7528
+>
+web/index.html,4\9\49767019a2fee22a613912508aa2789b74108680

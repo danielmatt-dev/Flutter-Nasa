@@ -6,7 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final HttpLink httpLink = HttpLink('https://flash-asset-417215.uc.r.appspot.com/graphql/');
+
+  const url = 'https://flash-asset-417215.uc.r.appspot.com/graphql/';
+
+  final HttpLink httpLink = HttpLink(url);
 
   final AuthLink authLink = AuthLink(
     getToken: () async {

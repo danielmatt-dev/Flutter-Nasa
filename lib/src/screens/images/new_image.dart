@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 import '../images/image_service.dart';
 
@@ -21,8 +20,8 @@ class _NewImageScreenState extends State<NewImageScreen> {
       setState(() {
         _isLoading = true;
       });
-      final client = GraphQLProvider.of(context).value;
-      final imageService = ImageService(client: client);
+
+      final imageService = ImageService();
 
       try {
         final DateTime earthDate = DateTime.parse(_earthDateController.text);

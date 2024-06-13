@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:nasa_app/src/login/register_screen.dart';
 import 'package:nasa_app/src/screens/menu/menu_navegacion.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -22,17 +20,15 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      final client = GraphQLProvider.of(context).value;
-      final authService = AuthService(client: client);
+      final authService = AuthService();
 
       try {
-        final token = await authService.login(
+        await authService.login(
           _usernameController.text,
           _passwordController.text,
         );
+        final token = await authService.getToken();
         if (token != null) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', token);
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => MenuNavegacion()),
           );
@@ -43,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: $e')),
+          SnackBar(content: Text('Error de inicio de sesión: $e')),
         );
       } finally {
         setState(() {
@@ -55,6 +51,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -68,11 +66,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent,
+                      color: colorScheme.primary,
                       borderRadius: BorderRadius.circular(16.0),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           'Iniciar sesión',
@@ -84,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         SizedBox(height: 8.0),
                         Text(
-                          'Entra a un mundo hermoso',
+                          'Bienvenido',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 16.0,
@@ -97,15 +95,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                      labelText: 'Correo electrónico',
-                      prefixIcon: Icon(Icons.email),
+                      labelText: 'Nombre de usuario',
+                      prefixIcon: Icon(Icons.person),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Por favor, ingresa tu correo electrónico';
+                        return 'Por favor, ingresa tu nombre de usuario';
                       }
                       return null;
                     },

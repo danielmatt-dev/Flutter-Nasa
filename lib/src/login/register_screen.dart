@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -28,8 +27,7 @@ class _SignupScreenState extends State<SignupScreen> {
         _isLoading = true;
       });
 
-      final client = GraphQLProvider.of(context).value;
-      final authService = AuthService(client: client);
+      final authService = AuthService();
 
       try {
         await authService.signup(

@@ -1,129 +1,135 @@
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageService {
-  final GraphQLClient client;
-
-  ImageService({required this.client});
-
-  final String feedQuery = """
-  query {
-    allImages {
-      id
-      imgSrc
-      roverName
-      cameraName
-      earthDate
-      postedBy {
-        id
-        username
-      }
-      votes {
-        id
-      }
-    }
-  }
-  """;
-
-  final String voteMutation = """
-  mutation CreateVote(\$imgId: Int!) {
-    createVote(imgId: \$imgId) {
-      img {
-        id
-        votes {
-          id
-        }
-      }
-    }
-  }
-  """;
-
-  final String createImageMutation = """
-  mutation CreateImage(
-    \$imgSrc: String!,
-    \$roverName: String!,
-    \$cameraName: String!,
-    \$earthDate: Date!
-  ) {
-    createImage(
-      imgSrc: \$imgSrc,
-      roverName: \$roverName,
-      cameraName: \$cameraName,
-      earthDate: \$earthDate
-    ) {
-      id
-      imgUrl
-      roverName
-      cameraName
-      earthDate
-    }
-  }
-  """;
+  final url = 'https://flash-asset-417215.uc.r.appspot.com/graphql/';
 
   Future<List<dynamic>> fetchImages() async {
-    final options = QueryOptions(
-      document: gql(feedQuery),
-      fetchPolicy: FetchPolicy.networkOnly,
-    );
+    final body = jsonEncode({
+      'query': '''
+        query {
+          allImages {
+            id
+            imgSrc
+            roverName
+            cameraName
+            earthDate
+            postedBy {
+              username
+            }
+            votes {
+              id
+            }
+          }
+        }
+      '''
+    });
 
-    try {
-      final result = await client.query(options).timeout(const Duration(seconds: 10));
-      if (result.hasException) {
-        print('GraphQL Exception: ${result.exception.toString()}');
-        throw Exception(result.exception.toString());
-      } else {
-        print('GraphQL Data: ${result.data}');
-        return result.data?['allImages'] ?? [];
-      }
-    } catch (e) {
-      print('Failed to load images: $e');
-      throw Exception('Failed to load images: $e');
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+
+    final response = await http.post(Uri.parse(url), headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse['data']['allImages'] ?? [];
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+      print('Error message: ${response.body}');
+      throw Exception('Failed to load images');
     }
   }
 
   Future<void> voteForImage(int imgId) async {
-    final options = MutationOptions(
-      document: gql(voteMutation),
-      variables: {
+    final prefs = await SharedPreferences.getInstance();
+    final authToken = prefs.getString('auth_token');
+    if (authToken == null) {
+      throw Exception('No auth token found');
+    }
+
+    final body = jsonEncode({
+      'query': '''
+        mutation CreateVote(\$imgId: Int!) {
+          createVote(imgId: \$imgId) {
+            img {
+              id
+              votes {
+                id
+              }
+            }
+          }
+        }
+      ''',
+      'variables': {
         'imgId': imgId,
       },
-    );
+    });
 
-    try {
-      final result = await client.mutate(options).timeout(const Duration(seconds: 10));
-      if (result.hasException) {
-        print('Exception: ${result.exception.toString()}');
-        throw Exception(result.exception.toString());
-      } else {
-        print('Vote Data: ${result.data}');
-      }
-    } catch (e) {
-      print('Failed to vote for image: $e');
-      throw Exception('Failed to vote for image: $e');
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'JWT $authToken',
+    };
+
+    final response = await http.post(Uri.parse(url), headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      print('Vote Data: ${jsonResponse['data']}');
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+      print('Error message: ${response.body}');
+      throw Exception('Failed to vote for image');
     }
   }
 
   Future<void> createImage(String imgSrc, String roverName, String cameraName, String earthDate) async {
-    final options = MutationOptions(
-      document: gql(createImageMutation),
-      variables: {
+    final prefs = await SharedPreferences.getInstance();
+    final authToken = prefs.getString('auth_token');
+    if (authToken == null) {
+      throw Exception('No auth token found');
+    }
+
+    final body = jsonEncode({
+      'query': '''
+        mutation CreateImage(\$imgSrc: String!, \$roverName: String!, \$cameraName: String!, \$earthDate: Date!) {
+          createImage(
+            imgSrc: \$imgSrc,
+            roverName: \$roverName,
+            cameraName: \$cameraName,
+            earthDate: \$earthDate
+          ) {
+            id
+            imgUrl
+            roverName
+            cameraName
+            earthDate
+          }
+        }
+      ''',
+      'variables': {
         'imgSrc': imgSrc,
         'roverName': roverName,
         'cameraName': cameraName,
         'earthDate': earthDate,
       },
-    );
+    });
 
-    try {
-      final result = await client.mutate(options).timeout(const Duration(seconds: 10));
-      if (result.hasException) {
-        print('Exception: ${result.exception.toString()}');
-        throw Exception(result.exception.toString());
-      } else {
-        print('Create Image Data: ${result.data}');
-      }
-    } catch (e) {
-      print('Failed to create image: $e');
-      throw Exception('Failed to create image: $e');
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'JWT $authToken',
+    };
+
+    final response = await http.post(Uri.parse(url), headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      print('Create Image Data: ${jsonResponse['data']}');
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+      print('Error message: ${response.body}');
+      throw Exception('Failed to create image');
     }
   }
 }
